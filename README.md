@@ -1,2 +1,3 @@
 # Mapa Unesp Bauru
-Projeto de Iniciação Científica do estudante Luis dos Santos Miguel (PIBIC-CNPq) sob orientação da profª Dra. Fernanda Henriques, com apoio do projeto de extensão Inky Design, da Unesp Bauru.
+Projeto de Iniciação Científica do estudante Luis dos Santos Miguel (PIBIC-CNPq) sob orientação da profª Dra. Fernanda Henriques, baseado no projeto de identidade visual desenvolvido pelo projeto de extensão Inky Design, da Unesp Bauru.
+Agradecimentos a Vitor Marchi, Cássia Carrara, Caio Henrique, Andresa Lins, Mariana Godoy e às diretorias da FAAC, FEB, FC e AG.
