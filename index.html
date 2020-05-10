@@ -104,9 +104,11 @@
         zoom: 14.42, // starting zoom
         transformRequest: transformRequest
       });
-      
-    
 
+
+      map.on("load", function() {
+        init();
+      });
 
       // Initialize Tabletop to access your table
       function init() {
@@ -143,7 +145,6 @@
 
         });
       }
-
 
     </script>
   </body>
