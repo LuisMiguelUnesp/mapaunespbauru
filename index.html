@@ -140,6 +140,19 @@
             .setPopup(popup)
             .addTo(map); // add the marker to the map
 
+
+        });
+      }
+
+    map.addControl(
+        new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        })
+    );      
+      
     </script>
   </body>
 
