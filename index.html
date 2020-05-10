@@ -110,6 +110,15 @@
         init();
       });
 
+      map.addControl(
+        new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        })
+    );
+
       // Initialize Tabletop to access your table
       function init() {
         Tabletop.init({
