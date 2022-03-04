@@ -93,68 +93,98 @@
       };
 
       //YOUR TURN: add your Mapbox access token 
-      mapboxgl.accessToken = 'pk.eyJ1IjoibHVpc21pZ3VlbHVuZXNwIiwiYSI6ImNrOXlzM3JhMTB5Yncza3BiYWhxMGdyYzAifQ.tlHpgu1-EI2Y0oz4aUPvVw';
-      var map = new mapboxgl.Map({
-        container: 'map', // container id
-        style: "mapbox://styles/luismiguelunesp/ck9xfh9o413671imobovjp4s5/draft", //YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
-        center: [-49.03096, -22.34901], // starting position [lng, lat]
-        zoom: 14.42, // starting zoom
-        transformRequest: transformRequest
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94LWNvbW11bml0eSIsImEiOiJja2tkN21jcjAwMG51MnBxdHAxemdueGpzIn0.e0IzLkytGq4pcGGieP8KNA'; //Mapbox token 
+    var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/mapbox/streets-v11', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
+      center: [-122.411, 37.785], // starting position [lng, lat]
+      zoom: 10,// starting zoom
+      transformRequest: transformRequest
+    });
+
+    $(document).ready(function () {
+      $.ajax({
+        type: "GET",
+        //YOUR TURN: Replace with csv export link
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTgauhMOERcNw8Q9QRrz4BjQUDLYJeqrEVuZynLbUUm799F26Uxe5bKGsGfMiCqiUxjoQQXACuddbm8/pubhtml',
+        dataType: "text",
+        success: function (csvData) { makeGeoJSON(csvData); }
       });
 
 
-      map.on("load", function() {
-        init();
-      });
 
-      map.addControl(
-        new mapboxgl.GeolocateControl({
-            positionOptions: {
-                enableHighAccuracy: true
-            },
-            trackUserLocation: true
-        })
-    );
+      function makeGeoJSON(csvData) {
+        csv2geojson.csv2geojson(csvData, {
+          latfield: 'Latitude',
+          lonfield: 'Longitude',
+          delimiter: ','
+        }, function (err, data) {
+          map.on('load', function () {
 
-      map.addControl(new mapboxgl.NavigationControl());
-      
-      // Initialize Tabletop to access your table
-      function init() {
-        Tabletop.init({
-          // YOUR TURN: change 'key' value to point to your spreadsheet
-          key: 'https://docs.google.com/spreadsheets/d/1y477dWduC5Uqv_hF6Rv_sozZfbv3CM5bC0LmtzqZb00/edit?usp=sharing',
-          // once Tabletop has loaded the data, it passes it to the 'callback' function, 'addPoints', defined below
-          callback: addPoints,
-          simpleSheet: true
+            //Add the the layer to the map
+            map.addLayer({
+              'id': 'csvData',
+              'type': 'circle',
+              'source': {
+                'type': 'geojson',
+                'data': data
+              },
+              'paint': {
+                'circle-radius': 5,
+                'circle-color': "purple"
+              }
+            });
+
+
+            // When a click event occurs on a feature in the csvData layer, open a popup at the
+            // location of the feature, with description HTML from its properties.
+            map.on('click', 'csvData', function (e) {
+              var coordinates = e.features[0].geometry.coordinates.slice();
+
+              //set popup text
+              //You can adjust the values of the popup to match the headers of your CSV.
+              // For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
+              var description = `<h3>` + e.features[0].properties.Name + `</h3>` + `<h4>` + `<b>` + `Address: ` + `</b>` + e.features[0].properties.Address + `</h4>` + `<h4>` + `<b>` + `Phone: ` + `</b>` + e.features[0].properties.Phone + `</h4>`;
+
+              // Ensure that if the map is zoomed out such that multiple
+              // copies of the feature are visible, the popup appears
+              // over the copy being pointed to.
+              while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+              }
+
+              //add Popup to map
+
+              new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+            });
+
+            // Change the cursor to a pointer when the mouse is over the places layer.
+            map.on('mouseenter', 'csvData', function () {
+              map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change it back to a pointer when it leaves.
+            map.on('mouseleave', 'places', function () {
+              map.getCanvas().style.cursor = '';
+            });
+
+            var bbox = turf.bbox(data);
+            map.fitBounds(bbox, { padding: 50 });
+
+          });
+
         });
-      }
+      };
+    });
 
 
-      // create a function called addPoints that iterates through your table (row by row) to create markers and popups
-      function addPoints(data) {
-
-        // iterate through your table to set the marker to lat/long values for each row
-
-        data.forEach(function(row) {
-
-          // create a variable for your popup and populate your popup with information from your table
-          var popup = new mapboxgl.Popup()
-            .setHTML('<h3>' + row.Nome + '</h3>' + '<h4>' + '<b>' + 'Categoria: ' + '</b>' + row.Categoria + '</h4>' + '<h4>' + '<b>' + 'Telefone: ' + '</b>' + row.Telefone + '</h4>'); // use the table to populate your popup with text
 
 
-          // create a variable for your markup and add it to the map 
-          var marker = new mapboxgl.Marker({
-              color: '#0071b2'
-            })
-            .setLngLat([row.Longitude, row.Latitude])
-            .setPopup(popup)
-            .addTo(map); // add the marker to the map
+  </script>
 
-
-        });
-      }
-
-    </script>
-  </body>
+</body>
 
 </html>
